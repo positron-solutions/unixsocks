@@ -31,7 +31,7 @@ There are three ways to obtain a binary:
 
 { pkgs, ... }:
   let
-    unixsocks = import ./unixsocks/;
+    unixsocks = (import ./unixsocks/).unixsocks;
   in {
     home.packages = [
       unixsocks
