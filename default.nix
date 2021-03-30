@@ -23,6 +23,7 @@ let
   rustPkgs = pkgs.rustBuilder.makePackageSet' {
     inherit rustChannel;
     packageFun = import ./Cargo.nix;
+    localPatterns = [ ''^(src|tests|unixsocks|assets|templates)(/.*)?'' ''[^/]*\.(rs|toml)$'' ];
   };
 in let
   rust-channel = pkgs.rust-bin.stable."1.50.0";
@@ -38,5 +39,5 @@ in rec {
     RUST_SRC_PATH = "${rustPkgs.rust-src}/lib/rustlib/src/rust/library/";
   };
 
-  package = rustPkgs.workspace.unixsocks.bin;
+  package = (rustPkgs.workspace.unixsocks {}).bin;
 }
