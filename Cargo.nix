@@ -836,7 +836,7 @@ in
     name = "unixsocks";
     version = "0.1.0";
     registry = "unknown";
-    src = fetchCrateLocal workspaceSrc + "/unixsocks";
+    src = fetchCrateLocal (workspaceSrc + "/unixsocks");
     dependencies = {
       anyhow = rustPackages."registry+https://github.com/rust-lang/crates.io-index".anyhow."1.0.40" { inherit profileName; };
       futures = rustPackages."registry+https://github.com/rust-lang/crates.io-index".futures."0.3.13" { inherit profileName; };

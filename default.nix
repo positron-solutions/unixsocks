@@ -23,7 +23,6 @@ let
   rustPkgs = pkgs.rustBuilder.makePackageSet' {
     inherit rustChannel;
     packageFun = import ./Cargo.nix;
-    localPatterns = [ ''^(src|tests|unixsocks|assets|templates)(/.*)?'' ''[^/]*\.(rs|toml)$'' ];
   };
 in let
   rust-channel = pkgs.rust-bin.stable."1.50.0";
