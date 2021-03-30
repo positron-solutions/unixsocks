@@ -3,12 +3,12 @@
         "branch": "master",
         "description": "Build Rust crates with Nix",
         "homepage": "",
-        "owner": "tenx-tech",
+        "owner": "cargo2nix",
         "repo": "cargo2nix",
-        "rev": "7980d189b194bc8dd24bb95edc4fb4df1fe7b0c0",
-        "sha256": "0lbzl0ra8jgkfzvjx3560acbn21kc30l0w2s49613mhbii1kb9q7",
+        "rev": "c491edfb1b2721c8202afe4051ce7b44adfb668d",
+        "sha256": "0aby21f72314qfmkqcdv7wpw6cywn7isr7gsh8gz992cn2szjpg4",
         "type": "tarball",
-        "url": "https://github.com/tenx-tech/cargo2nix/archive/7980d189b194bc8dd24bb95edc4fb4df1fe7b0c0.tar.gz",
+        "url": "https://github.com/cargo2nix/cargo2nix/archive/c491edfb1b2721c8202afe4051ce7b44adfb668d.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -35,16 +35,16 @@
         "url": "https://github.com/NixOS/nixpkgs-channels/archive/289466dd6a11c65a7de4a954d6ebf66c1ad07652.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
-    "nixpkgs-mozilla": {
+    "rust-overlay": {
         "branch": "master",
-        "description": "mozilla related nixpkgs (extends nixos/nixpkgs repo)",
-        "homepage": null,
-        "owner": "mozilla",
-        "repo": "nixpkgs-mozilla",
-        "rev": "50bae918794d3c283aeb335b209efd71e75e3954",
-        "sha256": "07b7hgq5awhddcii88y43d38lncqq9c8b2px4p93r5l7z0phv89d",
+        "description": "Pure and reproducible nix overlay for binary distributed rust toolchains",
+        "homepage": "",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "a9309152e39974309a95f3350ccb1337734c3fe5",
+        "sha256": "04428wpwc5hyaa4cvc1bx52i9m62ipavj0y7qs0h9cq9a7dl1zki",
         "type": "tarball",
-        "url": "https://github.com/mozilla/nixpkgs-mozilla/archive/50bae918794d3c283aeb335b209efd71e75e3954.tar.gz",
+        "url": "https://github.com/oxalica/rust-overlay/archive/a9309152e39974309a95f3350ccb1337734c3fe5.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }

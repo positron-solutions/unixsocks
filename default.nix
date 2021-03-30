@@ -5,18 +5,18 @@
   crossSystem ? null,
 }:
 let
-  rustChannel = "1.45.0";
+  rustChannel = "1.50.0";
 
   # Boilerplate for setting up Nixpkgs with cargo2nix, Rust, and our repo's packages.
-  inherit (source) nixpkgs nixpkgs-mozilla cargo2nix;
+  inherit (source) nixpkgs rust-overlay cargo2nix;
   pkgs = import nixpkgs {
     inherit system crossSystem;
     overlays =
       let
-        rustOverlay = import "${nixpkgs-mozilla}/rust-overlay.nix";
+        rustOverlay = import rust-overlay;
         cargo2nixOverlay = import "${cargo2nix}/overlay";
       in
-        [ cargo2nixOverlay rustOverlay repoOverlay ] ++ overlays;
+        [ cargo2nixOverlay rustOverlay ] ++ overlays;
   };
 
   # Define our Cargo workspace.
@@ -24,27 +24,9 @@ let
     inherit rustChannel;
     packageFun = import ./Cargo.nix;
   };
-
-  rust-src = (pkgs.rustChannelOf { channel = rustChannel; }).rust-src;
-
-  repoOverlay = self: super:
-    let
-      inherit (rustPkgs) workspace;
-      unixsocksSrc = self.callPackage self.workspace.unixsocks {};
-    in {
-      inherit workspace;
-      repoPkgs = {
-        unixsocks = unixsocksSrc.overrideAttrs(oldAttrs: {
-          installPhase = oldAttrs.installPhase or "" +
-                         ''
-                           rm -r $out/lib
-                           rm -r $out/.cargo-info
-                         '';
-        });
-      };
-    };
-in
-pkgs.repoPkgs // rec {
+in let
+  rust-channel = pkgs.rust-bin.stable."1.50.0";
+in rec {
   ci = with builtins; map
     (crate: pkgs.rustBuilder.runTests crate { /* Add `depsBuildBuild` test-only deps here, if any. */ })
     (attrValues rustPkgs.workspace);
@@ -53,6 +35,8 @@ pkgs.repoPkgs // rec {
     inputsFrom = pkgs.lib.mapAttrsToList (_: crate: crate {}) rustPkgs.noBuild.workspace;
     nativeBuildInputs = with rustPkgs; [ cargo rustc ] ++ [ (import cargo2nix {}).package ];
 
-    RUST_SRC_PATH = "${rust-src}/lib/rustlib/src/rust/src";
+    RUST_SRC_PATH = "${rustPkgs.rust-src}/lib/rustlib/src/rust/library/";
   };
+
+  package = rustPkgs.workspace.unixsocks.bin;
 }
