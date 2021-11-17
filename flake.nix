@@ -1,42 +1,60 @@
 {
-  source ? import ./nix/sources.nix,
-  system ? builtins.currentSystem,
-  overlays ? [],
-  crossSystem ? null,
-}:
-let
-  rustChannel = "1.50.0";
+  inputs = {
+    cargo2nix.url = "github:cargo2nix/cargo2nix/";
+    flake-utils.url = "github:numtide/flake-utils";
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
+    rust-overlay.inputs.flake-utils.follows = "flake-utils";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=release-21.05";
+  };
 
-  # Boilerplate for setting up Nixpkgs with cargo2nix, Rust, and our repo's packages.
-  inherit (source) nixpkgs rust-overlay cargo2nix;
-  pkgs = import nixpkgs {
-    inherit system crossSystem;
-    overlays =
+  outputs = { self, nixpkgs, cargo2nix, flake-utils, rust-overlay, ... }:
+
+    # Build the output set for each default system and map system sets into
+    # attributes, resulting in paths such as:
+    # nix build .#packages.x86_64-linux.<name>
+    flake-utils.lib.eachDefaultSystem (system:
+
+      # let-in expressions, very similar to Rust's let bindings.  These names
+      # are used to express the output but not themselves paths in the output.
       let
-        rustOverlay = import rust-overlay;
-        cargo2nixOverlay = import "${cargo2nix}/overlay";
-      in
-        [ cargo2nixOverlay rustOverlay ] ++ overlays;
-  };
 
-  # Define our Cargo workspace.
-  rustPkgs = pkgs.rustBuilder.makePackageSet' {
-    inherit rustChannel;
-    packageFun = import ./Cargo.nix;
-  };
-in let
-  rust-channel = pkgs.rust-bin.stable."1.50.0";
-in rec {
-  ci = with builtins; map
-    (crate: pkgs.rustBuilder.runTests crate { /* Add `depsBuildBuild` test-only deps here, if any. */ })
-    (attrValues rustPkgs.workspace);
+        # create nixpkgs that contains rustBuilder from cargo2nix overlay
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [(import "${cargo2nix}/overlay")
+                      rust-overlay.overlay];
+        };
 
-  shell = pkgs.mkShell {
-    inputsFrom = pkgs.lib.mapAttrsToList (_: crate: crate {}) rustPkgs.noBuild.workspace;
-    nativeBuildInputs = with rustPkgs; [ cargo rustc ] ++ [ (import cargo2nix {}).package ];
+        # create the workspace & dependencies package set
+        rustPkgs = pkgs.rustBuilder.makePackageSet' {
+          rustChannel = "1.56.1";
+          packageFun = import ./Cargo.nix;
+          # packageOverrides = pkgs: pkgs.rustBuilder.overrides.all; # Implied, if not specified
+        };
 
-    RUST_SRC_PATH = "${rustPkgs.rust-src}/lib/rustlib/src/rust/library/";
-  };
+        # The workspace defines a development shell with all of the dependencies
+        # and environment settings necessary for a regular `cargo build`
+        workspaceShell = rustPkgs.workspaceShell {};
 
-  package = (rustPkgs.workspace.unixsocks {}).bin;
+      in rec {
+        # this is the output (recursive) set (expressed for each system)
+
+        # nix develop
+        devShell = workspaceShell;
+
+        # the packages in `nix build .#packages.<system>.<name>`
+        packages = {
+          # nix build .#unixsocks
+          # nix build .#packages.x86_64-linux.unixsocks
+          unixsocks = (rustPkgs.workspace.unixsocks {}).bin;
+        };
+
+        # nix run github:positron-solutions/unixsocks
+        defaultApp = { type = "app"; program = "${defaultPackage}/bin/unixsocks";};
+
+        # nix build
+        defaultPackage = packages.unixsocks;
+      }
+    );
 }
