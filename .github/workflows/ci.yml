@@ -1,0 +1,63 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # nix flakes do not work on shallow clones
+      - uses: cachix/install-nix-action@v15
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      - uses: cachix/cachix-action@v10
+        with:
+          name: ${{ secrets.CACHIX_CACHE_NAME }}
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          pushFilter: "(.drv.chroot$)"
+
+      - name: build unixsocks
+        run: |
+          if [[ $RUNNER_OS == macOS ]]; then \
+            nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/nixpkgs-21.05-darwin
+            nix build
+          else
+            nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/nixos-21.05
+            nix build
+          fi
+
+      - name: run tests
+        run: |
+          if [[ $RUNNER_OS == macOS ]]; then \
+            nix develop --ignore-environment \
+            --override-input nixpkgs github:NixOS/nixpkgs/nixpkgs-21.05-darwin \
+            --command "cargo" "test"
+          else
+            nix develop --ignore-environment \
+            --override-input nixpkgs github:NixOS/nixpkgs/nixos-21.05 \
+            --command "cargo" "test"
+          fi
+
+      - name: use dev shell
+        # enter the shell with no environment paths and verify that toolchain is available
+        run: nix develop --ignore-environment --command "rustc" "--version"
