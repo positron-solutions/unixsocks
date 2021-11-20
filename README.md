@@ -1,8 +1,13 @@
 # Unixsocks
 
-Want to ssh over a tor service but `socat` doesn't accept unix addresses and
-you've configured your tor client to serve local clients over a unix socket?
-This is your tool!
+[![all builds & CI](https://github.com/positron-solutions/unixsocks/actions/workflows/ci.yml/badge.svg)](https://github.com/positron-solutions/unixsocks/actions/?workflow=CI)
+[![build on Linux](https://badgen.net/github/checks/positron-solutions/unixsocks/master/ubuntu)](https://github.com/positron-solutions/unixsocks/actions/?workflow=CI)
+[![build on Darwin](https://badgen.net/github/checks/positron-solutions/unixsocks/master/mac)](https://github.com/positron-solutions/unixsocks/actions/?workflow=CI)
+[![flakes supported](https://img.shields.io/badge/flake-supported-green)](https://nixos.wiki/wiki/Flakes)
+
+Want a stdio capable client to connect to a tor service but `socat` doesn't
+accept unix addresses and you've configured your tor client to serve local
+clients over a unix socket?  This is your tool!
 
 ## Usage
 
