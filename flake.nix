@@ -1,8 +1,8 @@
 {
   inputs = {
-    cargo2nix.url = "github:cargo2nix/cargo2nix/";
-    flake-utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:nixos/nixpkgs?ref=release-22.05";
+    cargo2nix.url = "github:cargo2nix/cargo2nix/release-0.11.0";
+    flake-utils.follows = "cargo2nix/flake-utils";
+    nixpkgs.follows = "cargo2nix/nixpkgs";
   };
 
   outputs = { self, nixpkgs, cargo2nix, flake-utils, ... }:
@@ -25,7 +25,7 @@
         # create the workspace & dependencies package set
         rustPkgs = pkgs.rustBuilder.makePackageSet {
           packageFun = import ./Cargo.nix;
-          rustVersion = "1.60.0";
+          rustVersion = "1.61.0";
         };
 
         # The workspace defines a development shell with all of the dependencies
