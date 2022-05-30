@@ -2,13 +2,10 @@
   inputs = {
     cargo2nix.url = "github:cargo2nix/cargo2nix/";
     flake-utils.url = "github:numtide/flake-utils";
-    rust-overlay.url = "github:oxalica/rust-overlay";
-    rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
-    rust-overlay.inputs.flake-utils.follows = "flake-utils";
-    nixpkgs.url = "github:nixos/nixpkgs?ref=release-21.05";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=release-22.05";
   };
 
-  outputs = { self, nixpkgs, cargo2nix, flake-utils, rust-overlay, ... }:
+  outputs = { self, nixpkgs, cargo2nix, flake-utils, ... }:
 
     # Build the output set for each default system and map system sets into
     # attributes, resulting in paths such as:
@@ -22,20 +19,20 @@
         # create nixpkgs that contains rustBuilder from cargo2nix overlay
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [(import "${cargo2nix}/overlay")
-                      rust-overlay.overlay];
+          overlays = [ cargo2nix.overlay ];
         };
 
         # create the workspace & dependencies package set
-        rustPkgs = pkgs.rustBuilder.makePackageSet' {
-          rustChannel = "1.56.1";
+        rustPkgs = pkgs.rustBuilder.makePackageSet {
           packageFun = import ./Cargo.nix;
-          # packageOverrides = pkgs: pkgs.rustBuilder.overrides.all; # Implied, if not specified
+          rustVersion = "1.60.0";
         };
 
         # The workspace defines a development shell with all of the dependencies
         # and environment settings necessary for a regular `cargo build`
-        workspaceShell = rustPkgs.workspaceShell {};
+        workspaceShell = rustPkgs.workspaceShell {
+          # pkgs.hello etc
+        };
 
       in rec {
         # this is the output (recursive) set (expressed for each system)
@@ -51,7 +48,10 @@
         };
 
         # nix run github:positron-solutions/unixsocks
-        defaultApp = { type = "app"; program = "${defaultPackage}/bin/unixsocks";};
+        apps = rec {
+          unixsocks = { type = "app"; program = "${defaultPackage}/bin/unixsocks"; };
+          default = unixsocks;
+        };
 
         # nix build
         defaultPackage = packages.unixsocks;

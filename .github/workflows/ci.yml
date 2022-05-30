@@ -34,15 +34,15 @@ jobs:
         with:
           name: ${{ secrets.CACHIX_CACHE_NAME }}
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-          pushFilter: "(.drv.chroot$)"
+          pushFilter: "(cargo-1.60.0-x86_64-unknown-linux-gnu$|.drv.chroot$)"
 
       - name: build unixsocks
         run: |
           if [[ $RUNNER_OS == macOS ]]; then \
-            nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/nixpkgs-21.05-darwin
+            nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/nixpkgs-22.05-darwin
             nix build
           else
-            nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/nixos-21.05
+            nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/nixos-22.05
             nix build
           fi
 
@@ -50,11 +50,11 @@ jobs:
         run: |
           if [[ $RUNNER_OS == macOS ]]; then \
             nix develop --ignore-environment \
-            --override-input nixpkgs github:NixOS/nixpkgs/nixpkgs-21.05-darwin \
+            --override-input nixpkgs github:NixOS/nixpkgs/nixpkgs-22.05-darwin \
             --command "cargo" "test"
           else
             nix develop --ignore-environment \
-            --override-input nixpkgs github:NixOS/nixpkgs/nixos-21.05 \
+            --override-input nixpkgs github:NixOS/nixpkgs/nixos-22.05 \
             --command "cargo" "test"
           fi
 
