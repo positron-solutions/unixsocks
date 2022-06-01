@@ -31,7 +31,8 @@
         # The workspace defines a development shell with all of the dependencies
         # and environment settings necessary for a regular `cargo build`
         workspaceShell = rustPkgs.workspaceShell {
-          # pkgs.hello etc
+          # This adds cargo2nix to the project shell via the cargo2nix flake
+          packages = [ cargo2nix.defaultPackage ];
         };
 
       in rec {
