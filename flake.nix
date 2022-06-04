@@ -5,7 +5,7 @@
     nixpkgs.follows = "cargo2nix/nixpkgs";
   };
 
-  outputs = { self, nixpkgs, cargo2nix, flake-utils, ... }:
+  outputs = inputs: with inputs;
 
     # Build the output set for each default system and map system sets into
     # attributes, resulting in paths such as:
@@ -31,20 +31,24 @@
         # The workspace defines a development shell with all of the dependencies
         # and environment settings necessary for a regular `cargo build`
         workspaceShell = rustPkgs.workspaceShell {
-          # pkgs.hello etc
+          # This adds cargo2nix to the project shell via the cargo2nix flake
+          packages = [ cargo2nix.packages."${system}".cargo2nix ];
         };
 
       in rec {
         # this is the output (recursive) set (expressed for each system)
 
-        # nix develop
-        devShell = workspaceShell;
+        devShells = {
+          default = workspaceShell; # nix develop
+        };
 
         # the packages in `nix build .#packages.<system>.<name>`
         packages = {
           # nix build .#unixsocks
           # nix build .#packages.x86_64-linux.unixsocks
           unixsocks = (rustPkgs.workspace.unixsocks {}).bin;
+          # nix build
+          default = packages.unixsocks;
         };
 
         # nix run github:positron-solutions/unixsocks
@@ -52,9 +56,6 @@
           unixsocks = { type = "app"; program = "${defaultPackage}/bin/unixsocks"; };
           default = unixsocks;
         };
-
-        # nix build
-        defaultPackage = packages.unixsocks;
       }
     );
 }

@@ -23,9 +23,7 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # nix flakes do not work on shallow clones
+      - uses: actions/checkout@v2.4.2
       - uses: cachix/install-nix-action@v15
         with:
           extra_nix_config: |
