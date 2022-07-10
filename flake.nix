@@ -53,7 +53,7 @@
 
         # nix run github:positron-solutions/unixsocks
         apps = rec {
-          unixsocks = { type = "app"; program = "${defaultPackage}/bin/unixsocks"; };
+          unixsocks = { type = "app"; program = "${packages.default}/bin/unixsocks"; };
           default = unixsocks;
         };
       }
