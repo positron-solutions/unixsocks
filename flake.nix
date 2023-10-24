@@ -35,7 +35,7 @@
         # create the workspace & dependencies package set
         rustPkgs = pkgs.rustBuilder.makePackageSet {
           packageFun = import ./Cargo.nix;
-          rustVersion = "1.72.1";
+          rustVersion = "1.73.0";
         };
 
         # The workspace defines a development shell with all of the dependencies
